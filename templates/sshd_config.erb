@@ -220,8 +220,8 @@ Subsystem sftp <%= @sshd_config_subsystem_sftp_real %>
 <% if @sshd_config_ciphers -%>
 Ciphers <%= @sshd_config_ciphers.join(',') %>
 <% end -%>
-<% if @sshd_config_kexalgorithms -%>
-KexAlgorithms <%= @sshd_config_kexalgorithms.join(',') %>
+<% if @sshd_config_kexalgorithms_real -%>
+KexAlgorithms <%= @sshd_config_kexalgorithms_real.join(',') %>
 <% end -%>
 <% if @sshd_config_macs -%>
 MACs <%= @sshd_config_macs.join(',') %>

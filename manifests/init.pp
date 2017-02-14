@@ -24,7 +24,7 @@ class ssh (
   $ssh_config_proxy_command            = undef,
   $ssh_strict_host_key_checking        = undef,
   $ssh_config_ciphers                  = undef,
-  $ssh_config_kexalgorithms            = undef,
+  $ssh_config_kexalgorithms            = 'USE_DEFAULTS',
   $ssh_config_macs                     = undef,
   $ssh_config_use_roaming              = 'USE_DEFAULTS',
   $ssh_config_template                 = 'ssh/ssh_config.erb',
@@ -136,6 +136,14 @@ class ssh (
       $default_sshd_config_serverkeybits       = '1024'
       $default_sshd_config_hostkey             = [ '/etc/ssh/ssh_host_rsa_key' ]
       $default_sshd_addressfamily              = 'any'
+      case $::operatingsystemmajrelease {
+        '5': {
+          $default_sshd_config_kexalgorithms = undef
+        }
+        default: {
+          $default_sshd_config_kexalgorithms = undef
+        }
+      }
     }
     'Suse': {
       $default_packages                        = 'openssh'
@@ -157,6 +165,7 @@ class ssh (
       $default_sshd_config_serverkeybits       = '1024'
       $default_sshd_config_hostkey             = [ '/etc/ssh/ssh_host_rsa_key' ]
       $default_sshd_addressfamily              = 'any'
+      $default_sshd_config_kexalgorithms       = undef
       case $::architecture {
         'x86_64': {
           if ($::operatingsystem == 'SLES') and ($::operatingsystemrelease =~ /^12\./) {
@@ -207,6 +216,7 @@ class ssh (
       $default_service_hasstatus               = true
       $default_sshd_config_serverkeybits       = '1024'
       $default_sshd_addressfamily              = 'any'
+      $default_sshd_config_kexalgorithms       = undef
     }
     'Solaris': {
       $default_ssh_config_hash_known_hosts     = undef
@@ -225,6 +235,7 @@ class ssh (
       $default_ssh_package_adminfile           = undef
       $default_sshd_config_hostkey             = [ '/etc/ssh/ssh_host_rsa_key' ]
       $default_sshd_addressfamily              = undef
+      $default_sshd_config_kexalgorithms       = undef
       case $::kernelrelease {
         '5.11': {
           $default_packages                      = ['network/ssh',
@@ -468,12 +479,15 @@ class ssh (
     validate_array($sshd_config_ciphers)
   }
 
-  if $ssh_config_kexalgorithms != undef {
-    validate_array($ssh_config_kexalgorithms)
+  if $sshd_config_kexalgorithms == 'USE_DEFAULTS' {
+    $sshd_config_kexalgorithms_real = $default_sshd_config_kexalgorithms
+  } else {
+    validate_array($sshd_config_kexalgorithms)
+    $sshd_config_kexalgorithms_real = $sshd_config_kexalgorithms
   }
 
-  if $sshd_config_kexalgorithms != undef {
-    validate_array($sshd_config_kexalgorithms)
+  if $sshd_config_kexalgorithms_real != undef {
+    validate_array($sshd_config_kexalgorithms_real)
   }
 
   if $ssh_config_macs != undef {
